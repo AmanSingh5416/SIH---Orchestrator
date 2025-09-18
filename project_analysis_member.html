@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Orchestrix - Project Analysis</title>
+  <link rel="icon" href="icon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      background: #FEF7ED;
+      display: flex;
+      min-height: 100vh;
+      font-family: "Montserrat", sans-serif;
+      overflow:HIDDEN;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: #0F4C3A;
+      color: #FEF7ED;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1rem;
+      min-height: 100vh;
+      position: fixed;
+      left: -100rem;
+      transition: left 0.3s ease;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    .sidebar.active { left: 0; }
+    .sidebar h2 { text-align: center; margin-bottom: 2rem; font-size: 1.5rem; }
+    .sidebar a {
+      color: #374151;
+      text-decoration: none;
+      padding: 0.8rem 1rem;
+      margin: 0.5rem 0;
+      border-radius: 12px;
+      display: block;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.3s ease;
+      background: #84CC16;
+      box-shadow: 2px 2px 5px black;
+    }
+    .sidebar a:hover {
+      background: linear-gradient(180deg, #84CC16, #65a30d, #4d7c0f);
+      transform: translateX(5px);
+      box-shadow: 2px 4px 12px black;
+      color: #fff;
+    }
+
+    /* Toggle */
+    .menu-btn {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      font-size: 1.8rem;
+      cursor: pointer;
+      z-index: 1100;
+      background: #0F4C3A;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+    }
+    .close-btn {
+      font-size: 1.5rem;
+      color: #fff;
+      background: none;
+      border: none;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 0;
+      flex: 1;
+      padding: 2rem;
+      transition: margin-left 0.3s ease;
+    }
+    .sidebar.active ~ .main-content { margin-left: 0px; }
+
+    .analysis-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .analysis-card h3 { margin-top: 0; color: #0F4C3A; }
+    .checklist { list-style: none; padding: 0; }
+    .checklist li {
+      margin: 0.5rem 0;
+      display: flex;
+      align-items: center;
+    }
+    .checklist input { margin-right: 10px; }
+    .done { text-decoration: line-through; color: #555; }
+
+    /* Floating options */
+    .options {
+      position: absolute;
+      right: 3rem;
+      bottom: 3rem;
+    }
+    .gradient-btn {
+      background: linear-gradient(45deg, #84CC16 0%, #22C55E 100%);
+      color: #000;
+      border: none;
+      padding: 8px 15px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 12px; 
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-right:10px;
+    }
+    .gradient-btn:hover { transform: scale(1.05); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); }
+    .no-work {
+      color: #777;
+      font-style: italic;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <button class="menu-btn" id="menuBtn"><i class="fa fa-bars" style="transform:scale(0.6);"></i></button>
+  <div class="sidebar" id="sidebar">
+    <button class="close-btn" id="closeBtn" style="transform:scale(0.7);"><i class="fa fa-times"></i></button>
+    <h2>Dashboard</h2>
+    <a href="ai-assistant.html">AI Assistant</a>
+    <a href="dashboard.html">Back to Projects</a>
+  </div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <h1 style="color:#374151;padding-top:1rem;">Project Alpha - Member Analysis</h1>
+
+    <div class="analysis-card">
+      <h3>Assigned Work</h3>
+      <ul id="assignedWork">
+        <li>Design wireframes</li>
+        <li>Build login page</li>
+        <li>Integrate calendar component</li>
+        <li>Add responsiveness</li>
+      </ul>
+    </div>
+
+    <div class="analysis-card">
+      <h3>Completed Work</h3>
+      <ul id="completedWork">
+        <li>Navigation sidebar</li>
+        <li>Login/Registration form</li>
+      </ul>
+    </div>
+
+    <div class="analysis-card">
+      <h3>Checklist</h3>
+      <ul id="checklist" class="checklist"></ul>
+      <p id="noWorkMsg" class="no-work" style="display:none;">No work</p>
+    </div>
+  </div>
+
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.getElementById("menuBtn");
+    const closeBtn = document.getElementById("closeBtn");
+    const assignedList = document.getElementById("assignedWork");
+    const completedList = document.getElementById("completedWork");
+    const checklist = document.getElementById("checklist");
+    const noWorkMsg = document.getElementById("noWorkMsg");
+
+    // Initialize checklist = assigned - completed
+    function renderChecklist() {
+      checklist.innerHTML = "";
+      const assignedTasks = Array.from(assignedList.children).map(li => li.textContent);
+      const completedTasks = Array.from(completedList.children).map(li => li.textContent);
+      const pendingTasks = assignedTasks.filter(task => !completedTasks.includes(task));
+
+      if (pendingTasks.length === 0) {
+        noWorkMsg.style.display = "block";
+        return;
+      } else {
+        noWorkMsg.style.display = "none";
+      }
+      
+      pendingTasks.forEach(task => {
+        const li = document.createElement("li");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        li.appendChild(checkbox);
+        li.appendChild(document.createTextNode(task));
+        checklist.appendChild(li);
+
+        checkbox.addEventListener("change", () => {
+          if (checkbox.checked) {
+            li.classList.add("done");
+            setTimeout(() => {
+              completedList.appendChild(document.createElement("li")).textContent = task;
+              li.remove();
+              renderChecklist(); // refresh to check if all tasks done
+            }, 400);
+          }
+        });
+      });
+    }
+
+    renderChecklist();
+
+    menuBtn.addEventListener("click", () => sidebar.classList.add("active"));
+    closeBtn.addEventListener("click", () => sidebar.classList.remove("active"));
+  </script>
+</body>
+</html>

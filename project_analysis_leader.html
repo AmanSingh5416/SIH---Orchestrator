@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Orchestrix - Team Leader Analysis</title>
+  <link rel="icon" href="icon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      background: #FEF7ED;
+      display: flex;
+      min-height: 100vh;
+      font-family: "Montserrat", sans-serif;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: #0F4C3A;
+      color: #FEF7ED;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1rem;
+      min-height: 100vh;
+      position: fixed;
+      left: -100rem;
+      transition: left 0.3s ease;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    .sidebar.active { left: 0; }
+    .sidebar h2 { text-align: center; margin-bottom: 2rem; font-size: 1.5rem; }
+    .sidebar a {
+      color: #374151;
+      text-decoration: none;
+      padding: 0.8rem 1rem;
+      margin: 0.5rem 0;
+      border-radius: 12px;
+      display: block;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.3s ease;
+      background: #84CC16;
+      box-shadow: 2px 2px 5px black;
+    }
+    .sidebar a:hover {
+      background: linear-gradient(180deg, #84CC16, #65a30d, #4d7c0f);
+      transform: translateX(5px);
+      box-shadow: 2px 4px 12px black;
+      color: #fff;
+    }
+
+    /* Toggle */
+    .menu-btn {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      font-size: 1.8rem;
+      cursor: pointer;
+      z-index: 1100;
+      background: #0F4C3A;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+    }
+    .close-btn {
+      font-size: 1.5rem;
+      color: #fff;
+      background: none;
+      border: none;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 0;
+      flex: 1;
+      padding: 2rem;
+      transition: margin-left 0.3s ease;
+    }
+    .sidebar.active ~ .main-content { margin-left: 0px; }
+
+    .member-cards {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .member-card {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      cursor: pointer;
+      flex: 1 1 150px;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .member-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      background: linear-gradient(135deg, #84CC16, #22C55E);
+      color: #fff;
+    }
+
+    .analysis-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .analysis-card h3 { margin-top: 0; color: #0F4C3A; }
+    .analysis-card ul { padding-left: 1.2rem; }
+
+    .assign-work {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .assign-work input, .assign-work select, .assign-work button {
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    .assign-work button {
+      background: linear-gradient(45deg, #84CC16, #22C55E);
+      border: none;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <button class="menu-btn" id="menuBtn"><i class="fa fa-bars" style="transform:scale(0.6);"></i></button>
+  <div class="sidebar" id="sidebar">
+    <button class="close-btn" id="closeBtn" style="transform:scale(0.7);"><i class="fa fa-times"></i></button>
+    <h2>Dashboard</h2>
+    <a href="ai-assistant.html">AI Assistant</a>
+    <a href="dashboard.html">Back to Projects</a>
+  </div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <h1 style="color:#374151;">Project Alpha - Team Leader Analysis</h1>
+
+    <!-- Team Members -->
+    <div class="member-cards" id="memberCards">
+      <div class="member-card" onclick="showMember('Aman')">Aman (Frontend)</div>
+      <div class="member-card" onclick="showMember('Sara')">Sara (Backend)</div>
+      <div class="member-card" onclick="showMember('Raj')">Raj (AI/ML)</div>
+    </div>
+
+    <!-- Member Analysis -->
+    <div class="analysis-card">
+      <h3 id="memberName">Select a member to view details</h3>
+      <h4>Assigned Work</h4>
+      <ul id="assignedList"></ul>
+      <h4>Completed Work</h4>
+      <ul id="completedList"></ul>
+    </div>
+
+    <!-- Assign Work -->
+    <div class="assign-work">
+      <h3>Assign New Work</h3>
+      <input type="text" id="taskInput" placeholder="Enter task here"/>
+      <select id="memberSelect">
+        <option value="Aman">Aman</option>
+        <option value="Sara">Sara</option>
+        <option value="Raj">Raj</option>
+      </select>
+      <button onclick="assignWork()">Assign</button>
+    </div>
+  </div>
+
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.getElementById("menuBtn");
+    const closeBtn = document.getElementById("closeBtn");
+
+    menuBtn.addEventListener("click", () => sidebar.classList.add("active"));
+    closeBtn.addEventListener("click", () => sidebar.classList.remove("active"));
+
+    // Team data
+    const teamData = {
+      "Aman": { assigned: ["Dashboard UI"], completed: ["Login page", "Sidebar"] },
+      "Sara": { assigned: ["Database schema"], completed: ["API setup"] },
+      "Raj": { assigned: ["ML model integration"], completed: ["Data preprocessing"] }
+    };
+
+    function showMember(name) {
+      document.getElementById("memberName").textContent = name + " - Details";
+      renderList("assignedList", teamData[name].assigned);
+      renderList("completedList", teamData[name].completed);
+    }
+
+    function renderList(elementId, items) {
+      const ul = document.getElementById(elementId);
+      ul.innerHTML = "";
+      items.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        ul.appendChild(li);
+      });
+    }
+
+    function assignWork() {
+      const task = document.getElementById("taskInput").value.trim();
+      const member = document.getElementById("memberSelect").value;
+      if (task) {
+        teamData[member].assigned.push(task);
+        showMember(member);
+        document.getElementById("taskInput").value = "";
+      }
+    }
+  </script>
+</body>
+</html>

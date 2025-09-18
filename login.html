@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login / Register</title>
+  <link rel="icon" href="icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Montserrat", sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #FEF7ED;
+      color: #374151;
+      overflow: hidden;
+    }
+
+    .stars {
+      width: 2px;
+      height: 2px;
+      background: #374151;
+      position: absolute;
+      border-radius: 50%;
+      animation: twinkle 2s infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes twinkle {
+      from { opacity: 0.3; }
+      to { opacity: 1; }
+    }
+
+    main {
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .container {
+      background: #73b313;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+      transition: 0.3s ease;
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    header h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      background: #f7f9fb;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+      border: 2px solid #FEF7ED;
+      box-shadow: 0 0 8px #FEF7ED;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      margin-top: 8px;
+      background: linear-gradient(135deg, #4B5563 0%, #374151 100%);
+      transition: all 0.3s ease;
+    }
+
+    .btn:active {
+      background: linear-gradient(135deg, #374151 0%, #1F2937 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .toggle-link {
+      display: block;
+      margin-top: 16px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #1e293b;
+      cursor: pointer;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .toggle-link:hover {
+      color: #374151;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .form-animate {
+      animation: zoomIn 0.4s ease forwards;
+      transform-origin: center;
+    }
+
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 24px; border-radius: 12px; }
+      header h2 { font-size: 1.4rem; }
+      .form-group input { padding: 10px; font-size: 0.9rem; }
+      .btn { padding: 10px; font-size: 0.9rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <section class="container" aria-label="Authentication Forms">
+      <form id="loginForm" role="form" aria-labelledby="loginTitle">
+        <header><h2 id="loginTitle">Login</h2></header>
+        <div class="form-group">
+          <label for="loginName">Name</label>
+          <input type="text" id="loginName" placeholder="Enter your name" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn">Login</button>
+        <span class="toggle-link" onclick="toggleForms()" role="button">Register</span>
+      </form>
+
+      <form id="registerForm" class="hidden" role="form" aria-labelledby="registerTitle" aria-hidden="true">
+        <header><h2 id="registerTitle">Register</h2></header>
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" placeholder="Enter your first name" required>
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" placeholder="Enter your last name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Password</label>
+          <input type="password" id="registerPassword" placeholder="Create a password" required>
+        </div>
+        <button type="submit" class="btn">Register</button>
+        <span class="toggle-link" onclick="toggleForms()" role="button">Back to Login</span>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const stars = [];
+
+    function getStarCount() {
+      if (window.innerWidth <= 480) return 80;
+      if (window.innerWidth <= 768) return 100;
+      return 120;
+    }
+
+    function createStars(count) {
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement("div");
+        star.className = "stars";
+        star.style.top = Math.random() * window.innerHeight + "px";
+        star.style.left = Math.random() * window.innerWidth + "px";
+        star.style.animationDuration = (Math.random() * 3 + 2) + "s";
+        document.body.appendChild(star);
+        stars.push(star);
+      }
+    }
+
+    function repositionStars() {
+      stars.forEach(star => {
+        star.style.top = Math.random() * window.innerHeight + "px";
+        star.style.left = Math.random() * window.innerWidth + "px";
+      });
+    }
+
+    createStars(getStarCount());
+
+    window.addEventListener("resize", () => {
+      repositionStars();
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      stars.forEach((star, i) => {
+        const dx = (e.clientX - window.innerWidth / 2) * 0.002 * (i % 5);
+        const dy = (e.clientY - window.innerHeight / 2) * 0.002 * (i % 5);
+        star.style.transform = `translate(${dx}px, ${dy}px)`;
+      });
+    });
+
+    function toggleForms() {
+      const loginForm = document.getElementById("loginForm");
+      const registerForm = document.getElementById("registerForm");
+
+      if (loginForm.classList.contains("hidden")) {
+        registerForm.classList.add("hidden");
+        registerForm.setAttribute("aria-hidden", "true");
+        loginForm.classList.remove("hidden");
+        loginForm.setAttribute("aria-hidden", "false");
+
+        loginForm.classList.remove("form-animate");
+        void loginForm.offsetWidth;
+        loginForm.classList.add("form-animate");
+      } else {
+        loginForm.classList.add("hidden");
+        loginForm.setAttribute("aria-hidden", "true");
+        registerForm.classList.remove("hidden");
+        registerForm.setAttribute("aria-hidden", "false");
+
+        registerForm.classList.remove("form-animate");
+        void registerForm.offsetWidth;
+        registerForm.classList.add("form-animate");
+      }
+    }
+  </script>
+</body>
+</html>
