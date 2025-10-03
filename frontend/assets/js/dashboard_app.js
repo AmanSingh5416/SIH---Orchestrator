@@ -1,15 +1,7 @@
-// Initialize dashboard with user data
-// Dynamic backend URL detection
-const getBackendUrl = () => {
-  const hostname = window.location.hostname;
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:5000';
-  } else {
-    // For network access, use your local IP
-    return 'http://10.106.87.236:5000';
-  }
-};
-const BASE_URL = getBackendUrl();
+// Dashboard functionality
+
+// Get API configuration from centralized config
+const BASE_URL = window.API_CONFIG ? window.API_CONFIG.BASE_URL.replace('/api', '') : `http://${window.location.hostname}:8000`;
 
 // Calendar variables
 let currentMonth = new Date().getMonth();
@@ -41,7 +33,7 @@ const API = {
 
 // SECURITY: Real-time authentication validation
 async function validateAuthenticationRealTime() {
-    const token = localStorage.getItem('token');
+    const token = window.Auth ? window.Auth.getToken() : localStorage.getItem('token');
     
     // If no token, redirect immediately
     if (!token) {
@@ -51,13 +43,15 @@ async function validateAuthenticationRealTime() {
     }
     
     try {
-        // Verify token with backend
+        // Verify token with backend using centralized headers
+        const headers = window.Auth ? window.Auth.getAuthHeaders() : {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+        
         const response = await fetch(`${BASE_URL}/api/auth/verify-token`, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+            headers: headers
         });
         
         if (!response.ok) {
@@ -89,14 +83,21 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
-// SECURITY: Window focus detection
-window.addEventListener('focus', function() {
-    validateAuthenticationRealTime();
-});
+// SECURITY: Window focus detection (temporarily disabled for debugging)
+// window.addEventListener('focus', function() {
+//     validateAuthenticationRealTime();
+// });
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // SECURITY: Real-time authentication check
-    await validateAuthenticationRealTime();
+    // SECURITY: Basic authentication check (less aggressive)
+    const token = window.Auth ? window.Auth.getToken() : localStorage.getItem('token');
+    if (!token) {
+        console.warn('No authentication token found. Redirecting to login.');
+        window.location.replace('../pages/login.html');
+        return;
+    }
+    
+    console.log('Token found, initializing dashboard...');
     
     // Get DOM elements for calendar
     window.calendarDays = document.getElementById("calendarDays");
@@ -136,19 +137,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.warn('Could not initialize logout functionality:', error);
     }
     
-    // Check authentication
-    const token = localStorage.getItem('token');
-    if (!token) {
-        console.warn('No authentication token found. You may need to login first.');
-        // You might want to redirect to login page here
-        // window.location.href = 'login.html';
-    }
+    // Test backend connectivity (delayed to allow login to complete)
+    setTimeout(() => {
+        testBackendConnection();
+    }, 1000);
     
-    // Test backend connectivity
-    testBackendConnection();
-    
-    // Load user-specific data
-    loadUserSpecificData();
+    // Load user-specific data (delayed to allow login to complete)
+    setTimeout(() => {
+        loadUserSpecificData();
+    }, 500);
     
     // Initialize sidebar
     const sidebar = document.getElementById("sidebar");
@@ -174,11 +171,13 @@ async function loadUserSpecificData() {
             return;
         }
 
-        // Get user info
+        // Get user info using centralized auth headers
+        const headers = window.Auth ? window.Auth.getAuthHeaders() : {
+            'Authorization': `Bearer ${token}`
+        };
+        
         const userResponse = await fetch(`${BASE_URL}/api/auth/me`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: headers
         });
 
         if (userResponse.ok) {
@@ -219,7 +218,7 @@ function updateUserInfo(user) {
 // Load user's projects (using teams API for compatibility)
 async function loadUserTeams() {
     try {
-        const token = localStorage.getItem('token');
+        const token = window.Auth ? window.Auth.getToken() : localStorage.getItem('token');
         if (!token) {
             showEmptyState();
             return;
@@ -227,10 +226,12 @@ async function loadUserTeams() {
 
         console.log('Loading user projects from:', `${BASE_URL}/api/teams/my-teams`);
         
+        const headers = window.Auth ? window.Auth.getAuthHeaders() : {
+            'Authorization': `Bearer ${token}`
+        };
+        
         const response = await fetch(`${BASE_URL}/api/teams/my-teams`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: headers
         });
 
         console.log('Projects API response status:', response.status);
@@ -471,7 +472,7 @@ async function sendAssistant(){
   aInput.value = '';
 
   try {
-    const res = await API.post('/api/chat', {
+    const res = await API.post('api/chat', {
       message: text,
       session_id: currentSessionId // send existing session or ""
     });
@@ -557,11 +558,13 @@ document.getElementById("date").value = "";
 async function testBackendConnection() {
     try {
         console.log('Testing backend connection to:', BASE_URL);
+        const headers = window.Auth ? window.Auth.getAuthHeaders() : {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        };
+        
         const response = await fetch(`${BASE_URL}/api/auth/me`, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+            headers: headers
         });
         
         console.log('Backend test response status:', response.status);
@@ -651,17 +654,22 @@ function showCreateTeamDialog() {
         }
         
         // Debug: Check if token exists
-        const token = localStorage.getItem('token');
+        const token = window.Auth ? window.Auth.getToken() : localStorage.getItem('token');
         console.log('Auth token exists:', !!token); // Debug logging
         console.log('Making request to:', `${BASE_URL}/api/teams/create`); // Debug logging
         
         try {
+            const headers = window.Auth ? {
+                'Content-Type': 'application/json',
+                ...window.Auth.getAuthHeaders()
+            } : {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            };
+            
             const response = await fetch(`${BASE_URL}/api/teams/create`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
+                headers: headers,
                 body: JSON.stringify({
                     name: teamName,
                     description: teamDesc || 'Project created from dashboard'
@@ -763,12 +771,17 @@ function showJoinTeamDialog() {
         console.log('Joining project with code:', teamCode); // Debug logging
         
         try {
+            const headers = window.Auth ? {
+                'Content-Type': 'application/json',
+                ...window.Auth.getAuthHeaders()
+            } : {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            };
+            
             const response = await fetch(`${BASE_URL}/api/teams/join`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
+                headers: headers,
                 body: JSON.stringify({ teamCode })
             });
             

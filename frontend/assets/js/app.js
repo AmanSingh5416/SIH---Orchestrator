@@ -1,13 +1,30 @@
-// API Configuration and Authentication Utils
-const API_CONFIG = {
+// HRMS Application Core - Safe loading wrapper
+(function() {
+  'use strict';
+  
+  // Prevent multiple loading
+  if (window.HRMS_LOADED) {
+    console.log('🔄 HRMS already loaded, skipping...');
+    return;
+  }
+
+// API Configuration with universal network access
+// Use window object to prevent redeclaration errors
+window.API_CONFIG = window.API_CONFIG || {
   BASE_URL: (() => {
     const hostname = window.location.hostname;
-    if (['localhost','127.0.0.1'].includes(hostname) || window.location.protocol === 'file:') {
-      return 'http://localhost:5000/api';
-    } else {
-      // For network access, use the current host but with port 5000
-      return `http://${hostname}:5000/api`;
+    console.log('🔍 Detected hostname:', hostname);
+    
+    // For network access, always use the same host but port 5000
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      const networkApi = `http://${hostname}:5000/api`;
+      console.log('🌐 Using network API:', networkApi);
+      return networkApi;
     }
+    
+    // For localhost, use localhost API
+    console.log('🏠 Using localhost API');
+    return 'http://localhost:5000/api';
   })(),
   
   AUTH_ENDPOINTS: {
@@ -44,27 +61,88 @@ const API_CONFIG = {
   }
 };
 
-// Authentication utilities
-const Auth = {
-  // Get stored token
+// Create a reference for easier access
+const API_CONFIG = window.API_CONFIG;
+
+// Authentication utilities with cross-origin support
+window.Auth = window.Auth || {
+  // Storage key prefix to avoid conflicts
+  TOKEN_KEY: 'hrms_token',
+  USER_KEY: 'hrms_user',
+  
+  // Get stored token with fallback mechanisms
   getToken() {
-    return localStorage.getItem('token');
+    // Try localStorage first
+    let token = localStorage.getItem(this.TOKEN_KEY);
+    if (token) return token;
+    
+    // Fallback to legacy key for compatibility
+    token = localStorage.getItem('token');
+    if (token) {
+      // Migrate to new key
+      localStorage.setItem(this.TOKEN_KEY, token);
+      localStorage.removeItem('token');
+      return token;
+    }
+    
+    // Try sessionStorage as backup
+    token = sessionStorage.getItem(this.TOKEN_KEY);
+    if (token) return token;
+    
+    // Check URL parameters for token (network access workaround)
+    const urlParams = new URLSearchParams(window.location.search);
+    token = urlParams.get('token');
+    if (token) {
+      // Store it for future use
+      this.setToken(token);
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return token;
+    }
+    
+    return null;
+  },
+  
+  // Set token with multiple storage methods
+  setToken(token) {
+    localStorage.setItem(this.TOKEN_KEY, token);
+    sessionStorage.setItem(this.TOKEN_KEY, token);
+    // Legacy support
+    localStorage.setItem('token', token);
   },
   
   // Get stored user data
   getUser() {
-    const userData = localStorage.getItem('user');
+    let userData = localStorage.getItem(this.USER_KEY);
+    if (!userData) {
+      userData = localStorage.getItem('user'); // Legacy fallback
+    }
+    if (!userData) {
+      userData = sessionStorage.getItem(this.USER_KEY); // Backup
+    }
     return userData ? JSON.parse(userData) : null;
+  },
+  
+  // Set user data with multiple storage methods
+  setUser(user) {
+    const userStr = JSON.stringify(user);
+    localStorage.setItem(this.USER_KEY, userStr);
+    sessionStorage.setItem(this.USER_KEY, userStr);
+    // Legacy support
+    localStorage.setItem('user', userStr);
   },
   
   // Check if user is logged in
   isAuthenticated() {
-    return !!this.getToken();
+    const token = this.getToken();
+    console.log('🔐 Auth check - Token present:', !!token);
+    return !!token;
   },
   
   // Login user
   async login(credentials) {
     try {
+      console.log('🔐 Attempting login to:', API_CONFIG.BASE_URL);
       const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.AUTH_ENDPOINTS.LOGIN}`, {
         method: 'POST',
         headers: {
@@ -74,22 +152,38 @@ const Auth = {
       });
       
       const data = await response.json();
+      console.log('🔐 Login response:', { success: data.success, hasToken: !!data.user?.token });
       
       if (data.success) {
-        // Clear any existing tokens before setting new ones
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        // Clear any existing authentication data
+        this.clearAuth();
         
-        // Set new tokens
-        localStorage.setItem('token', data.user.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        // Set new authentication data using enhanced storage
+        this.setToken(data.user.token);
+        this.setUser(data.user);
+        
+        console.log('🔐 Login successful, token stored');
         return { success: true, user: data.user };
       } else {
+        console.error('🔐 Login failed:', data.error);
         return { success: false, error: data.error };
       }
     } catch (error) {
+      console.error('🔐 Login error:', error);
       return { success: false, error: 'Network error' };
     }
+  },
+  
+  // Clear all authentication data
+  clearAuth() {
+    // Clear all possible storage locations
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
+    sessionStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.USER_KEY);
+    sessionStorage.clear();
   },
   
   // Register user
@@ -112,10 +206,9 @@ const Auth = {
   
   // Logout user
   logout() {
-    // Clear all stored authentication data
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    sessionStorage.clear(); // Clear session storage as well
+    console.log('🔐 Logging out user');
+    // Use the enhanced clear method
+    this.clearAuth();
     
     // Clear any cached user data
     localStorage.removeItem('deadlines');
@@ -132,13 +225,32 @@ const Auth = {
       return false;
     }
     return true;
+  },
+  
+  // Get authentication headers for API requests
+  getAuthHeaders() {
+    const token = this.getToken();
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
   }
 };
 
-// API request helper with authentication
-const API = {
+// Create a reference for easier access
+const Auth = window.Auth;
+
+// API request helper with authentication and better error handling
+window.API = window.API || {
   async request(endpoint, options = {}) {
     const token = Auth.getToken();
+    const fullUrl = `${API_CONFIG.BASE_URL}${endpoint}`;
+    
+    console.log('🌐 API Request:', {
+      url: fullUrl,
+      hasToken: !!token,
+      method: options.method || 'GET'
+    });
     
     const config = {
       headers: {
@@ -149,19 +261,31 @@ const API = {
     };
     
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, config);
-      const data = await response.json();
+      const response = await fetch(fullUrl, config);
+      console.log('📡 API Response Status:', response.status);
       
-      // If unauthorized, logout user
+      // Handle different response types
       if (response.status === 401) {
+        console.error('🚨 401 Unauthorized - Logging out user');
+        console.error('Request URL:', fullUrl);
+        console.error('Token present:', !!token);
         Auth.logout();
         return;
       }
       
+      if (!response.ok) {
+        console.error('� API Error Response:', response.status, response.statusText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ API Success:', endpoint);
       return data;
     } catch (error) {
-      console.error('API Error:', error);
-      return { success: false, error: 'Network error' };
+      console.error('🔥 API Request Failed:', error);
+      console.error('Failed URL:', fullUrl);
+      console.error('Token was:', token ? 'Present' : 'Missing');
+      return { success: false, error: error.message || 'Network error' };
     }
   },
   
@@ -194,8 +318,11 @@ const API = {
   }
 };
 
+// Create references for easier access  
+const API = window.API;
+
 // UI Utilities
-const UI = {
+window.UI = window.UI || {
   // Show notification
   showNotification(message, type = 'info') {
     // Create notification element
@@ -249,8 +376,11 @@ const UI = {
   }
 };
 
+// Create references for easier access
+const UI = window.UI;
+
 // Navigation utilities
-const Navigation = {
+window.Navigation = window.Navigation || {
   goToLogin() {
     window.location.href = 'login.html';
   },
@@ -289,8 +419,11 @@ const Navigation = {
   }
 };
 
+// Create references for easier access
+const Navigation = window.Navigation;
+
 // Team Management utilities
-const TeamManager = {
+window.TeamManager = window.TeamManager || {
   // Create a new team
   async createTeam(teamData) {
     try {
@@ -597,3 +730,12 @@ function initSidebarInteraction() {
     }
   });
 }
+
+// Create final references for easier access
+const TeamManager = window.TeamManager;
+
+// Mark as loaded
+window.HRMS_LOADED = true;
+console.log('✅ HRMS Application loaded successfully');
+
+})(); // End of IIFE

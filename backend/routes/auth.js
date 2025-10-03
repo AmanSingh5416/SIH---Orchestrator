@@ -1,7 +1,7 @@
 // Auth API routes
 
 const express = require('express');
-const { registerUser, loginUser, getMe } = require('../controllers/authController');
+const { registerUser, loginUser, getMe, updateProfile, changePassword } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -20,6 +20,16 @@ router.post('/login', loginUser);
 // @desc    Get current logged in user
 // @access  Private
 router.get('/me', protect, getMe);
+
+// @route   PUT /api/auth/update-profile
+// @desc    Update user profile
+// @access  Private
+router.put('/update-profile', protect, updateProfile);
+
+// @route   PUT /api/auth/change-password
+// @desc    Change user password
+// @access  Private
+router.put('/change-password', protect, changePassword);
 
 // @route   GET /api/auth/verify-token
 // @desc    Verify if token is valid and user exists

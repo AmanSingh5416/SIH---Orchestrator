@@ -115,18 +115,95 @@ const getMe = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
   res.status(200).json({
     success: true,
-    user: {
-      _id: user._id,
-      email: user.email,
-      firstName: user.personalInfo.firstName,
-      lastName: user.personalInfo.lastName,
-      employeeID: user.workInfo.employeeID,
-      role: user.role,
-      department: user.workInfo.department,
-      location: user.personalInfo.location,
-      skills: user.workInfo.skills,
-      experienceLevel: user.workInfo.experienceLevel
-    }
+    data: user // Return full user object for profile page
+  });
+});
+
+// @desc    Update user profile
+// @route   PUT /api/auth/update-profile
+// @access  Private
+const updateProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  // Extract updateable fields from request body
+  const { personalInfo, workInfo } = req.body;
+  
+  // Update personal information (excluding sensitive fields)
+  if (personalInfo) {
+    if (personalInfo.firstName) user.personalInfo.firstName = personalInfo.firstName;
+    if (personalInfo.lastName) user.personalInfo.lastName = personalInfo.lastName;
+    if (personalInfo.phoneNumber !== undefined) user.personalInfo.phoneNumber = personalInfo.phoneNumber;
+    if (personalInfo.dateOfBirth !== undefined) user.personalInfo.dateOfBirth = personalInfo.dateOfBirth;
+    if (personalInfo.address !== undefined) user.personalInfo.address = personalInfo.address;
+    if (personalInfo.location) user.personalInfo.location = personalInfo.location;
+  }
+  
+  // Update work information (excluding sensitive fields like employeeID, department, salary)
+  if (workInfo) {
+    if (workInfo.title !== undefined) user.workInfo.title = workInfo.title;
+    if (workInfo.experienceLevel) user.workInfo.experienceLevel = workInfo.experienceLevel;
+    if (workInfo.capacityHours !== undefined) user.workInfo.capacityHours = workInfo.capacityHours;
+    if (workInfo.skills) user.workInfo.skills = workInfo.skills;
+  }
+
+  const updatedUser = await user.save();
+
+  res.json({
+    success: true,
+    message: 'Profile updated successfully',
+    data: updatedUser
+  });
+});
+
+// @desc    Change user password
+// @route   PUT /api/auth/change-password
+// @access  Private
+const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  
+  // Validation
+  if (!currentPassword || !newPassword) {
+    res.status(400);
+    throw new Error('Please provide current password and new password');
+  }
+  
+  if (newPassword.length < 6) {
+    res.status(400);
+    throw new Error('New password must be at least 6 characters long');
+  }
+
+  // Get user with password field
+  const user = await User.findById(req.user.id).select('+password');
+  
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  // Check current password
+  const isCurrentPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+  
+  if (!isCurrentPasswordCorrect) {
+    res.status(400);
+    throw new Error('Current password is incorrect');
+  }
+
+  // Hash new password
+  const salt = await bcrypt.genSalt(10);
+  const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+  // Update password
+  user.password = hashedNewPassword;
+  await user.save();
+
+  res.json({
+    success: true,
+    message: 'Password changed successfully'
   });
 });
 
@@ -134,4 +211,6 @@ module.exports = {
   registerUser,
   loginUser,
   getMe,
+  updateProfile,
+  changePassword,
 };

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - API Test</title>
+</head>
+<body>
+    <h1>HRMS API Configuration Test</h1>
+    <div id="results"></div>
+    
+    <script src="../assets/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const results = document.getElementById('results');
+            
+            try {
+                results.innerHTML = `
+                    <h3>✅ JavaScript loaded successfully!</h3>
+                    <p><strong>API Base URL:</strong> ${window.API_CONFIG.BASE_URL}</p>
+                    <p><strong>Current Host:</strong> ${window.location.hostname}</p>
+                    <p><strong>Available Objects:</strong></p>
+                    <ul>
+                        <li>API_CONFIG: ${typeof window.API_CONFIG}</li>
+                        <li>Auth: ${typeof window.Auth}</li>
+                        <li>API: ${typeof window.API}</li>
+                        <li>UI: ${typeof window.UI}</li>
+                        <li>Navigation: ${typeof window.Navigation}</li>
+                        <li>TeamManager: ${typeof window.TeamManager}</li>
+                    </ul>
+                `;
+            } catch (error) {
+                results.innerHTML = `<h3>❌ Error: ${error.message}</h3>`;
+            }
+        });
+    </script>
+</body>
+</html>

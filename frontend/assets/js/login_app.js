@@ -2,9 +2,43 @@ const stars = [];
 function getStarCount() {
     if (window.innerWidth <= 480) return 80;
     if (window.innerWidth <= 768) return 100;
-    return 120;
+    return 30;
 }
+const blob = document.querySelector(".blob");
 
+    document.addEventListener("mousemove", (e) => {
+      blob.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+});
+document.addEventListener("contextmenu", (e) => e.preventDefault());
+
+// Disable F12, Ctrl+Shift+I, Ctrl+U
+document.addEventListener("keydown", (e) => {
+  if (
+    e.key === "F12" || 
+    (e.ctrlKey && e.shiftKey && e.key === "I") ||
+    (e.ctrlKey && e.key === "u")
+  ) {
+    e.preventDefault();
+  }
+});
+const loginBox = document.querySelector(".container");
+
+document.addEventListener("click", (e) => {
+    // If the click is inside the form, ignore
+    if (loginBox.contains(e.target)) return;
+
+    // Create a spark
+    const spark = document.createElement("div");
+    spark.className = "spark";
+    spark.style.left = `${e.clientX - 3}px`;
+    spark.style.top = `${e.clientY - 3}px`;
+    document.body.appendChild(spark);
+
+    // Remove after animation
+    spark.addEventListener("animationend", () => {
+    spark.remove();
+    });
+});
 function createStars(count) {
     for (let i = 0; i < count; i++) {
     const star = document.createElement("div");
@@ -32,8 +66,8 @@ window.addEventListener("resize", () => {
 
 document.addEventListener("mousemove", (e) => {
     stars.forEach((star, i) => {
-    const dx = (e.clientX - window.innerWidth / 2) * 0.002 * (i % 5);
-    const dy = (e.clientY - window.innerHeight / 2) * 0.002 * (i % 5);
+    const dx = (e.clientX - window.innerWidth / 2) * 0.0035 * (i % 5);
+    const dy = (e.clientY - window.innerHeight / 2) * 0.0035 * (i % 5);
     star.style.transform = `translate(${dx}px, ${dy}px)`;
     });
 });

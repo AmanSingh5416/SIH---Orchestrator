@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - HRMS</title>
+    
+    <!-- Prevent caching for security -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <link rel="stylesheet" href="../assets/css/profile.css">
+    <link rel="stylesheet" href="../assets/css/theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="icon.png">
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <button class="close-btn" id="closeBtn"><i class="fa fa-times"></i></button>
+     <div class="brand">
+      <div class="logo"><i class="fa-solid fa-user-tie"></i></div>
+    </div>
+    <nav class="nav">
+      <a href="dashboard.html"><span class="icon"><i class="fa-solid fa-house"></i></span> Dashboard</a>
+      <a href="project_analysis_member.html"><span class="icon"><i class="fa fa-chart-line"></i></span> Project Analysis</a>
+      <a href="profile.html" class="active"><span class="icon"><i class="fa fa-user"></i></span> Profile</a>
+      <a href="#" class="logout-btn"><span class="icon"><i class="fa fa-right-from-bracket"></i></span> Logout</a>
+    </nav>
+   
+    <div class="userbox">
+      <div class="user-name">Loading...</div>
+      <div class="user-role">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Menu button -->
+  <button class="menu-btn" id="menuBtn"><i class="fa fa-bars"></i></button>
+
+  <!-- Main content -->
+  <div class="center">
+    <div class="main-content">
+      <div class="profile-header">
+        <h1 class="page-title">
+          <i class="fa fa-user"></i>
+          My Profile
+        </h1>
+        <button class="gradient-btn edit-toggle-btn" id="editToggleBtn">
+          <i class="fa fa-edit"></i>
+          Edit Profile
+        </button>
+      </div>
+
+      <!-- Profile Avatar Section -->
+      <div class="profile-avatar-section">
+        <div class="avatar-container">
+          <div class="avatar" id="profileAvatar">
+            <i class="fa fa-user"></i>
+          </div>
+          <button class="avatar-upload-btn" id="avatarUploadBtn" style="display: none;">
+            <i class="fa fa-camera"></i>
+          </button>
+        </div>
+        <div class="profile-name">
+          <h2 id="displayName">Loading...</h2>
+          <span id="displayRole">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Profile Content -->
+      <div class="profile-content">
+        <!-- Personal Information -->
+        <div class="profile-section">
+          <div class="section-header">
+            <h3><i class="fa fa-user-circle"></i> Personal Information</h3>
+          </div>
+          <div class="profile-grid">
+            <div class="profile-field">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" readonly>
+            </div>
+            <div class="profile-field">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" readonly>
+            </div>
+            <div class="profile-field">
+              <label for="email">Email</label>
+              <input type="email" id="email" readonly>
+            </div>
+            <div class="profile-field">
+              <label for="phoneNumber">Phone Number</label>
+              <input type="tel" id="phoneNumber" readonly>
+            </div>
+            <div class="profile-field">
+              <label for="dateOfBirth">Date of Birth</label>
+              <input type="date" id="dateOfBirth" readonly>
+            </div>
+            <div class="profile-field">
+              <label for="address">Address</label>
+              <textarea id="address" readonly rows="3"></textarea>
+            </div>
+            <div class="profile-field">
+              <label for="location">Location</label>
+              <input type="text" id="location" readonly>
+            </div>
+          </div>
+        </div>
+
+        <!-- Work Information -->
+        <div class="profile-section">
+          <div class="section-header">
+            <h3><i class="fa fa-briefcase"></i> Work Information</h3>
+          </div>
+          <div class="profile-grid">
+            <div class="profile-field">
+              <label for="employeeID">Employee ID</label>
+              <input type="text" id="employeeID" readonly>
+            </div>
+            <div class="profile-field">
+              <label for="title">Job Title</label>
+              <input type="text" id="title" readonly>
+            </div>
+            <div class="profile-field">
+              <label for="department">Department</label>
+              <input type="text" id="department" readonly>
+            </div>
+            <div class="profile-field">
+              <label for="dateOfJoining">Date of Joining</label>
+              <input type="date" id="dateOfJoining" readonly>
+            </div>
+            <div class="profile-field">
+              <label for="experienceLevel">Experience Level</label>
+              <select id="experienceLevel" disabled>
+                <option value="junior">Junior</option>
+                <option value="mid">Mid-level</option>
+                <option value="senior">Senior</option>
+                <option value="lead">Lead</option>
+              </select>
+            </div>
+            <div class="profile-field">
+              <label for="capacityHours">Weekly Capacity (Hours)</label>
+              <input type="number" id="capacityHours" min="0" max="80" readonly>
+            </div>
+            <div class="profile-field skills-field">
+              <label for="skills">Skills</label>
+              <div id="skillsContainer" class="skills-container">
+                <div id="skillsList" class="skills-list"></div>
+                <input type="text" id="newSkill" placeholder="Add a skill..." style="display: none;">
+                <button type="button" id="addSkillBtn" style="display: none;">
+                  <i class="fa fa-plus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="profile-field current-projects-field">
+              <label for="currentProjects">Current Projects</label>
+              <div id="currentProjectsList" class="projects-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security Section -->
+        <div class="profile-section">
+          <div class="section-header">
+            <h3><i class="fa fa-lock"></i> Security</h3>
+          </div>
+          <div class="security-actions">
+            <button class="gradient-btn change-password-btn" id="changePasswordBtn">
+              <i class="fa fa-key"></i>
+              Change Password
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="profile-actions" id="profileActions" style="display: none;">
+          <button class="gradient-btn save-btn" id="saveBtn">
+            <i class="fa fa-save"></i>
+            Save Changes
+          </button>
+          <button class="cancel-btn" id="cancelBtn">
+            <i class="fa fa-times"></i>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal-overlay" id="passwordModalOverlay" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Change Password</h3>
+        <button class="modal-close-btn" id="passwordModalCloseBtn">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content">
+        <div class="profile-field">
+          <label for="currentPassword">Current Password</label>
+          <input type="password" id="currentPassword" placeholder="Enter current password">
+        </div>
+        <div class="profile-field">
+          <label for="newPassword">New Password</label>
+          <input type="password" id="newPassword" placeholder="Enter new password">
+        </div>
+        <div class="profile-field">
+          <label for="confirmPassword">Confirm New Password</label>
+          <input type="password" id="confirmPassword" placeholder="Confirm new password">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="gradient-btn" id="updatePasswordBtn">
+          <i class="fa fa-save"></i>
+          Update Password
+        </button>
+        <button class="cancel-btn" id="cancelPasswordBtn">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load app.js first for API configuration -->
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/profile_app.js"></script>
+</body>
+</html>

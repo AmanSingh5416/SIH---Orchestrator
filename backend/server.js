@@ -19,20 +19,43 @@ app.use(express.urlencoded({ extended: false }));
 // Enable CORS
 app.use(cors({
   origin: (origin, callback) => {
+    console.log('🌐 CORS Request from origin:', origin);
+    
+    // Always allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) {
+      console.log('✅ CORS: No origin - allowing');
+      return callback(null, true);
+    }
+    
     const allowed = process.env.CLIENT_URL;
-    if (!origin) return callback(null, true); // non-browser or same-origin
-    if (allowed && origin === allowed) return callback(null, true);
+    if (allowed && origin === allowed) {
+      console.log('✅ CORS: Matches CLIENT_URL');
+      return callback(null, true);
+    }
     
     // Allow localhost on any port (development)
-    if (/^http:\/\/localhost:\d{2,5}$/.test(origin)) return callback(null, true);
-    if (/^http:\/\/127\.0\.0\.1:\d{2,5}$/.test(origin)) return callback(null, true);
+    if (/^http:\/\/localhost:\d{2,5}$/.test(origin)) {
+      console.log('✅ CORS: localhost allowed');
+      return callback(null, true);
+    }
+    if (/^http:\/\/127\.0\.0\.1:\d{2,5}$/.test(origin)) {
+      console.log('✅ CORS: 127.0.0.1 allowed');
+      return callback(null, true);
+    }
     
-    // Allow local network access (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
-    if (/^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:\d{2,5}$/.test(origin)) return callback(null, true);
-    if (/^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{2,5}$/.test(origin)) return callback(null, true);
-    if (/^http:\/\/172\.(1[6-9]|2[0-9]|3[0-1])\.\d{1,3}\.\d{1,3}:\d{2,5}$/.test(origin)) return callback(null, true);
+    // Allow ALL local network access (much more permissive)
+    if (/^http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{2,5}$/.test(origin)) {
+      console.log('✅ CORS: Local network IP allowed');
+      return callback(null, true);
+    }
     
-    console.log('CORS blocked origin:', origin);
+    // Allow file:// protocol for local development
+    if (origin.startsWith('file://')) {
+      console.log('✅ CORS: File protocol allowed');
+      return callback(null, true);
+    }
+    
+    console.log('🚨 CORS blocked origin:', origin);
     return callback(new Error('CORS not allowed: ' + origin));
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
