@@ -1,7 +1,7 @@
 // Dashboard functionality
 
 // Get API configuration from centralized config
-const BASE_URL = window.API_CONFIG ? window.API_CONFIG.BASE_URL.replace('/api', '') : `http://${window.location.hostname}:5000`;
+const BASE_URL = window.API_CONFIG ? window.API_CONFIG.BASE_URL.replace('/api', '') : `http://${window.location.hostname}:8000`;
 
 // Calendar variables
 let currentMonth = new Date().getMonth();
@@ -472,7 +472,7 @@ async function sendAssistant(){
   aInput.value = '';
 
   try {
-    const res = await API.post('/api/chat', {
+    const res = await API.post('api/chat', {
       message: text,
       session_id: currentSessionId // send existing session or ""
     });

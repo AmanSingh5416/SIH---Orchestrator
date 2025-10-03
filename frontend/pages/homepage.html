@@ -3,13 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Orchestrix - Human Resource Management</title>
+  <title>Orchestrix - Human Resource Manager</title>
   <link rel="stylesheet" href="../assets/css/theme.css">
   <link rel="stylesheet" href="../assets/css/homepage_style.css">
+  <link rel="icon" href="icon.png">
 </head>
 <body>
-  <nav>
-    <div class="logo">HRMS</div>
+  <div class="blob"></div>
+  <nav class="navbar">
+    <div class="logo metallic" style="font-size:1.5rem;">ORCHESTRIX</div>
     <ul id="navLinks">
       <li><a href="#home">Home</a></li>
       <li><a href="#about">About Us</a></li>
@@ -19,67 +21,72 @@
   </nav>
 
   <!-- HERO -->
-  <section id="home" aria-label="Home hero">
+  <section id="home" class="home" aria-label="Home hero">
     <div class="hero-bg" aria-hidden="true"></div>
     <div id="particles-js" aria-hidden="true"></div>
 
     <div class="hero-content" id="heroContent">
       <h1 class="typing-text">Human Resource Management System</h1>
       <p class="subtitle">Streamline your HR processes with AI-powered employee management, project tracking, and resource optimization.</p>
-      <a class="btn-primary" href="#contact" id="getStartedBtn">Get Started Now</a>
-    </div>
+      <a class="btn-primary" href="login.html" id="getStartedBtn">Get Started Now</a>
+    </div>7
   </section>
 
   <!-- ABOUT -->
-  <section id="about">
+  <section class="about fade-in-on-scroll" id="about">
     <h2>About Us</h2>
     <p class="intro">We build AI orchestration systems that empower businesses to scale, adapt, and thrive. Our platform connects people, processes and models to deliver reliable automation and fast decisions.</p>
 
     <div class="cards" role="list">
-      <div class="card" role="listitem">
-        <h3>AI-Powered Resource Management</h3>
-        <p>Optimize allocation of human and digital resources through predictive analytics and AI-driven decisions.</p>
+      <div class="card" role="listitem" data-image="AI.png">
+        <canvas class="card-overlay"></canvas>
+        <div class="card-text">
+          <h3>AI-Powered Resource Management</h3>
+          <p>Optimize allocation of human and digital resources through predictive analytics and AI-driven decisions.</p>
+        </div>
       </div>
 
-      <div class="card" role="listitem">
-        <h3>Multi-Agent Collaboration</h3>
-        <p>Multiple AI agents coordinate to handle complex enterprise operations seamlessly and efficiently.</p>
+      <div class="card" role="listitem" data-image="AGENT.png">
+        <canvas class="card-overlay"></canvas>
+        <div class="card-text">
+          <h3>Multi-Agent Collaboration</h3>
+          <p>Multiple AI agents coordinate to handle complex enterprise operations seamlessly and efficiently.</p>
+        </div>
       </div>
 
-      <div class="card" role="listitem">
-        <h3>Real-Time Insights</h3>
+      <div class="card" role="listitem" data-image="INSIGHT.png">
+        <canvas class="card-overlay"></canvas>
+        <div class="card-text">
+           <h3>Real-Time Insights</h3>
         <p>Monitor processes with live dashboards, alerts, and performance tracking for faster decisions.</p>
+        </div>
       </div>
 
-      <div class="card" role="listitem">
-        <h3>Security First</h3>
+      <div class="card" role="listitem" data-image="SECURE.png">
+        <canvas class="card-overlay"></canvas>
+        <div class="card-text">
+           <h3>Security First</h3>
         <p>End-to-end encryption and secure data handling for compliance and trust.</p>
+        </div>
+       
       </div>
     </div>
   </section>
 
   <!-- CONTACT -->
-  <section id="contact">
+  <section class="contact fade-in-on-scroll" id="contact">
     <h2>Contact Us</h2>
     <div class="contact-container">
 
       <div class="contact-form" aria-labelledby="contact-form-title">
-        <h3 id="contact-form-title" style="margin-top:0">Send a message</h3>
-        <form onsubmit="event.preventDefault(); alert('Message sent (demo)')">
+        <h3 id="contact-form-title" style="margin-top:0;color:#F0F0F0;margin-bottom:1rem;">Send a message</h3>
+        <form onsubmit="event.preventDefault(); alert('Message sent (demo)')" class="cont_form">
           <input type="text" placeholder="Your Name" required />
           <input type="email" placeholder="Your Email" required />
           <textarea placeholder="Your Message"></textarea>
           <button class="btn-primary" type="submit">Send Message</button>
         </form>
       </div>
-
-      <div class="contact-info" aria-hidden="false">
-        <h3>Get in touch</h3>
-        <p>Email: hello@orchestrix.example</p>
-        <p>Phone: +91 98765 43210</p>
-        <p style="margin-top:.5rem">We usually reply within 24 hours.</p>
-      </div>
-
     </div>
   </section>
 
