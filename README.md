@@ -525,7 +525,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### Project Maintainers
 - **Aman Singh** - [@AmanSingh5416](https://github.com/AmanSingh5416)
 
----
 
 <div align="center">
 
