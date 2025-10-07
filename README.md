@@ -57,7 +57,7 @@ npm run setup
 
 # Start development servers
 npm run dev
-```
+--
 
 The application will be available at:
 - **Frontend**: http://localhost:3000
